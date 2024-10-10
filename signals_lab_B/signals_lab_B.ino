@@ -11,7 +11,7 @@ int motorBPin_B = 5; // Arduino digital 5 connected to HG7881's B-1B terminal
 
 // Distance variables
 int duration, dist, error;
-int SET_POINT = 10;  // Stop the car if an obstacle is closer than this distance (cm)
+int SET_POINT = 15;  // Stop the car if an obstacle is closer than this distance (cm)
 
 // Minimum power required for motion
 int BASE = 120;
@@ -33,14 +33,21 @@ void setup() {
 
 void loop() {
   // Measure the distance
-  measureDistance();
+  
 
-  if (error < 0) {
+  while (error < 0) {
     setRightMotor(15);
     setLeftMotor(0);
-  } else {
+    measureDistance();
+    Serial.print(error);
+    Serial.println();
+  } 
+  while (error > -3) {
     setRightMotor(0);
     setLeftMotor(15);
+    measureDistance();
+    Serial.print(error);
+    Serial.println();
   }
 
   // If no obstacle within STOP_DISTANCE, move forward; otherwise, stop
@@ -55,6 +62,7 @@ void loop() {
   // }
 
   delay(250);  // Wait a bit before the next reading
+
 }
 
 
