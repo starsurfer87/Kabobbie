@@ -1,6 +1,8 @@
 // Ultrasonic sensor and motor control pins
-int trigPin = 11;    // Trigger
-int echoPin = 10;    // Echo
+int trigPinL = 11;   // Trigger for left ultrasonic sensor
+int echoPinL = 10;   // Echo for left ultrasonic sensor
+int trigPinR = 3;    // Trigger for right ultrasonic sensor
+int echoPinR = 6;    // Echo for right ultrasonic sensor
 
 // Motor control pins
 // A is right wheel, B is left wheel
@@ -10,8 +12,10 @@ int motorBPin_A = 4; // Arduino digital 4 connected to HG7881's B-1A terminal
 int motorBPin_B = 5; // Arduino digital 5 connected to HG7881's B-1B terminal
 
 // Distance variables
-int duration, dist, error;
-int SET_POINT = 15;  // Stop the car if an obstacle is closer than this distance (cm)
+int distL, distR;
+//int SET_POINT = 15;  // Stop the car if an obstacle is closer than this distance (cm)
+int BUFF = 2; // allowed difference between distL and distR, must be a positive integer -- CAN FINE TUNE
+int POWER = 15; // standard power output to motors, should be in [-100,100] -- CAN FINE TUNE
 
 // Minimum power required for motion
 int BASE = 120;
@@ -21,8 +25,8 @@ void setup() {
   Serial.begin(9600);
 
   // Set up ultrasonic sensor pins
-  pinMode(trigPin, OUTPUT);
-  pinMode(echoPin, INPUT);
+  pinMode(trigPinL, OUTPUT);
+  pinMode(echoPinL, INPUT);
 
   // Set up motor pins as outputs
   pinMode(motorAPin_A, OUTPUT);
@@ -32,40 +36,27 @@ void setup() {
 }
 
 void loop() {
-  // Measure the distance
-  
+  measureDistanceR();
+  measureDistanceL();
 
-  while (error < 0) {
-    setRightMotor(15);
-    setLeftMotor(0);
-    measureDistance();
-    Serial.print(error);
-    Serial.println();
-  } 
-  while (error > -3) {
+  if (abs(distL-distR) < BUFF) {
+    setRightMotor(POWER);
+    setLeftMotor(POWER);
+    Serial.println("GO STRAIGHT");
+  } else if (distR > distL) {
     setRightMotor(0);
-    setLeftMotor(15);
-    measureDistance();
-    Serial.print(error);
-    Serial.println();
+    setLeftMotor(POWER);
+    Serial.println("TURN RIGHT");
+  } else if (distR < distL) {
+    setRightMotor(POWER);
+    setLeftMotor(0);
+    Serial.println("TURN LEFT");
   }
 
-  // If no obstacle within STOP_DISTANCE, move forward; otherwise, stop
-  // if (error > 300) {
-  //   powerOutput(-100);
-  // } else if (error < -300) {
-  //   powerOutput(100);
-  // } else if (abs(error) < 2) {
-  //   powerOutput(0);
-  // } else {
-  //   powerOutput(error*(-100)/300);
-  // }
 
   delay(250);  // Wait a bit before the next reading
 
 }
-
-
 
 // takes a value between [-100, 100] and set power output of right motor accordingly
 void setRightMotor(int val) {
@@ -98,23 +89,49 @@ void setLeftMotor(int val) {
 }
 
 // Measure distance using the ultrasonic sensor
-void measureDistance() {
+void measureDistanceL() {
   // Send a 10-microsecond pulse to trigger the ultrasonic sensor
-  digitalWrite(trigPin, LOW);
+  digitalWrite(trigPinL, LOW);
   delayMicroseconds(5);
-  digitalWrite(trigPin, HIGH);
+  digitalWrite(trigPinL, HIGH);
   delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
+  digitalWrite(trigPinL, LOW);
 
   // Measure the echo signal duration
-  duration = pulseIn(echoPin, HIGH);
+  int duration = pulseIn(echoPinL, HIGH);
 
   // Convert the duration to distance in centimeters
-  dist = (duration / 2) / 29.1;
-  error = SET_POINT - dist;
+  distL = (duration / 2) / 29.1;
+  //errorL = SET_POINT - distL;
+
+  // Output the distances to the Serial Monitor
+  Serial.print("LEFT: ");
+  Serial.print(distL);
+  Serial.println(" cm");
+
+
+
+}
+
+// Measure distance using the ultrasonic sensor
+void measureDistanceR() {
+  // Send a 10-microsecond pulse to trigger the ultrasonic sensor
+  digitalWrite(trigPinR, LOW);
+  delayMicroseconds(5);
+  digitalWrite(trigPinR, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPinR, LOW);
+
+  // Measure the echo signal duration
+  int duration = pulseIn(echoPinR, HIGH);
+
+  // Convert the duration to distance in centimeters
+  distR = (duration / 2) / 29.1;
+  //errorR = SET_POINT - distR;
 
   // Output the distance to the Serial Monitor
-  Serial.print(dist);
+  Serial.print("RIGHT: ");
+  Serial.print(distR);
   Serial.println(" cm");
 }
 
