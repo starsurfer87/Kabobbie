@@ -3,6 +3,7 @@ int trigPin = 11;    // Trigger
 int echoPin = 10;    // Echo
 
 // Motor control pins
+// A is right wheel, B is left wheel
 int motorAPin_A = 8; // Arduino digital 8 connected to HG7881's A-1A terminal
 int motorAPin_B = 9; // Arduino digital 9 connected to HG7881's A-1B terminal
 int motorBPin_A = 4; // Arduino digital 4 connected to HG7881's B-1A terminal
@@ -10,7 +11,7 @@ int motorBPin_B = 5; // Arduino digital 5 connected to HG7881's B-1B terminal
 
 // Distance variables
 int duration, dist, error;
-int SET_POINT = 20;  // Stop the car if an obstacle is closer than this distance (cm)
+int SET_POINT = 10;  // Stop the car if an obstacle is closer than this distance (cm)
 
 // Minimum power required for motion
 int BASE = 120;
@@ -34,18 +35,58 @@ void loop() {
   // Measure the distance
   measureDistance();
 
-  // If no obstacle within STOP_DISTANCE, move forward; otherwise, stop
-  if (error > 300) {
-    powerOutput(-100);
-  } else if (error < -300) {
-    powerOutput(100);
-  } else if (abs(error) < 2) {
-    powerOutput(0);
+  if (error < 0) {
+    setRightMotor(15);
+    setLeftMotor(0);
   } else {
-    powerOutput(error*(-100)/300);
+    setRightMotor(0);
+    setLeftMotor(15);
   }
 
+  // If no obstacle within STOP_DISTANCE, move forward; otherwise, stop
+  // if (error > 300) {
+  //   powerOutput(-100);
+  // } else if (error < -300) {
+  //   powerOutput(100);
+  // } else if (abs(error) < 2) {
+  //   powerOutput(0);
+  // } else {
+  //   powerOutput(error*(-100)/300);
+  // }
+
   delay(250);  // Wait a bit before the next reading
+}
+
+
+
+// takes a value between [-100, 100] and set power output of right motor accordingly
+void setRightMotor(int val) {
+  if (val == 0) {
+    analogWrite(motorAPin_B, LOW);
+  } else if (val > 0) {
+    int outputMapped = map(val, 0, 100, BASE, 255);
+    analogWrite(motorAPin_A, LOW);
+    analogWrite(motorAPin_B, outputMapped);
+  } else {
+    int outputMapped = map(val, 0, -100, BASE, 255);
+    analogWrite(motorAPin_A, 255);
+    analogWrite(motorAPin_B, invert(outputMapped));
+  }
+}
+
+// takes a value between [-100, 100] and set power output of left motor accordingly
+void setLeftMotor(int val) {
+  if (val == 0) {
+    analogWrite(motorBPin_B, LOW);
+  } else if (val > 0) {
+    int outputMapped = map(val, 0, 100, BASE, 255);
+    analogWrite(motorBPin_A, LOW);
+    analogWrite(motorBPin_B, outputMapped);
+  } else {
+    int outputMapped = map(val, 0, -100, BASE, 255);
+    analogWrite(motorBPin_A, 255);
+    analogWrite(motorBPin_B, invert(outputMapped));
+  }
 }
 
 // Measure distance using the ultrasonic sensor
@@ -70,7 +111,7 @@ void measureDistance() {
 }
 
 // Move car based on power output
-void powerOutput(long output) {
+void powerOutput(int output) {
   if (output == 0) {
     stop();
   } else if (output > 0) {
@@ -80,34 +121,6 @@ void powerOutput(long output) {
     int outputMapped = map(output, 0, -100, BASE, 255);
     backward(outputMapped);
   }
-}
-
-// Move the car forward
-void forward(int power) {
-  // Set direction forward
-  analogWrite(motorAPin_A, LOW);
-  analogWrite(motorBPin_A, LOW);
-
-  analogWrite(motorAPin_B, power);
-  analogWrite(motorBPin_B, power);
-}
-
-// Move car backward
-void backward(int power) {
-  // Set direction backward
-  analogWrite(motorAPin_A, 255);
-  analogWrite(motorBPin_A, 255);
-
-  analogWrite(motorAPin_B, invert(power));
-  analogWrite(motorBPin_B, invert(power));
-}
-
-// Stops motors
-void stop() {
-  analogWrite(motorAPin_A, LOW);
-  analogWrite(motorAPin_B, LOW);
-  analogWrite(motorBPin_A, LOW);
-  analogWrite(motorBPin_B, LOW);
 }
 
 // Inverts value for backward motion
