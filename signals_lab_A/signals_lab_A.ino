@@ -9,17 +9,11 @@ int motorBPin_A = 4; // Arduino digital 4 connected to HG7881's B-1A terminal
 int motorBPin_B = 5; // Arduino digital 5 connected to HG7881's B-1B terminal
 
 // Distance variables
-long duration, dist, error;
-long SET_POINT = 20;  // Stop the car if an obstacle is closer than this distance (cm)
+int duration, dist, error;
+int SET_POINT = 20;  // Stop the car if an obstacle is closer than this distance (cm)
 
-// Speed control
+// Minimum power required for motion
 int BASE = 120;
-
-// Function declarations
-void measureDistance();
-void forward();
-void stopMotors();
-int invertOurValue(int input);
 
 void setup() {
   // Initialize serial communication
@@ -41,13 +35,14 @@ void loop() {
   measureDistance();
 
   // If no obstacle within STOP_DISTANCE, move forward; otherwise, stop
-  if (abs(error) > 300) {
-    forward(255);
+  if (error > 300) {
+    powerOutput(-100);
+  } else if (error < -300) {
+    powerOutput(100);
+  } else if (abs(error) < 2) {
+    powerOutput(0);
   } else {
-    long power = map(error, 0, -300, BASE, 255);
-    Serial.print(power);
-    Serial.println(" out");
-    forward(power);
+    powerOutput(error*(-100)/300);
   }
 
   delay(250);  // Wait a bit before the next reading
@@ -74,6 +69,19 @@ void measureDistance() {
   Serial.println(" cm");
 }
 
+// Move car based on power output
+void powerOutput(long output) {
+  if (output == 0) {
+    stop();
+  } else if (output > 0) {
+    int outputMapped = map(output, 0, 100, BASE, 255);
+    forward(outputMapped);
+  } else {
+    int outputMapped = map(output, 0, -100, BASE, 255);
+    backward(outputMapped);
+  }
+}
+
 // Move the car forward
 void forward(int power) {
   // Set direction forward
@@ -84,30 +92,25 @@ void forward(int power) {
   analogWrite(motorBPin_B, power);
 }
 
-// Stop both motors
-void stopMotors() {
+// Move car backward
+void backward(int power) {
+  // Set direction backward
+  analogWrite(motorAPin_A, 255);
+  analogWrite(motorBPin_A, 255);
+
+  analogWrite(motorAPin_B, power);
+  analogWrite(motorBPin_B, power);
+}
+
+// Stops motors
+void stop() {
   analogWrite(motorAPin_A, LOW);
   analogWrite(motorAPin_B, LOW);
   analogWrite(motorBPin_A, LOW);
   analogWrite(motorBPin_B, LOW);
 }
 
-// (Optional) Functions for backward, turnLeft, turnRight can be added as needed
-
-void backward() {
-  // Set direction backward
-  analogWrite(motorAPin_A, 255);
-  analogWrite(motorBPin_A, 255);
-
-  // Increase speed
-  for (int i = BASE; i <= 255; i++) {
-    analogWrite(motorAPin_B, invertOurValue(i));
-    analogWrite(motorBPin_B, invertOurValue(i));
-    delay(40);
-  }
-}
-
-// Function to invert value for backward motion
+// Inverts value for backward motion
 int invertOurValue(int input) {
   return 255 - input;
 }
