@@ -110,19 +110,6 @@ void measureDistance() {
   Serial.println(" cm");
 }
 
-// Move car based on power output
-void powerOutput(int output) {
-  if (output == 0) {
-    stop();
-  } else if (output > 0) {
-    int outputMapped = map(output, 0, 100, BASE, 255);
-    forward(outputMapped);
-  } else {
-    int outputMapped = map(output, 0, -100, BASE, 255);
-    backward(outputMapped);
-  }
-}
-
 // Inverts value for backward motion
 int invert(int input) {
   return 255 - input;
