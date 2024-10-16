@@ -1,6 +1,6 @@
 // Ultrasonic sensor and motor control pins
 int trigPin = 11;    // Trigger
-int echoPin = 10;    // Echo
+int echoPin = 12;    // Echo
 
 // Motor control pins
 int motorAPin_A = 8; // Arduino digital 8 connected to HG7881's A-1A terminal
