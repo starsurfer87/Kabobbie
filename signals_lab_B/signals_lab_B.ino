@@ -1,6 +1,6 @@
 // Ultrasonic sensor and motor control pins
 int trigPinL = 11;   // Trigger for left ultrasonic sensor
-int echoPinL = 10;   // Echo for left ultrasonic sensor
+int echoPinL = 12;   // Echo for left ultrasonic sensor
 int trigPinR = 3;    // Trigger for right ultrasonic sensor
 int echoPinR = 6;    // Echo for right ultrasonic sensor
 
