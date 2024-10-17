@@ -1,11 +1,11 @@
 // Ultrasonic sensor and motor control pins
 int trigPinL = 11;   // Trigger for left ultrasonic sensor
-int echoPinL = 12;   // Echo for left ultrasonic sensor TODO: check if this needs to be changed
+int echoPinL = 10;   // Echo for left ultrasonic sensor 
 int trigPinR = 3;    // Trigger for right ultrasonic sensor
 int echoPinR = 6;    // Echo for right ultrasonic sensor
 
 // Motor control pins
-// A is left wheel, B is right wheel TODO: swap labels on Kabobbie to reflect this
+// A is left wheel, B is right wheel 
 int motorAPin_A = 8; // Arduino digital 8 connected to HG7881's A-1A terminal
 int motorAPin_B = 9; // Arduino digital 9 connected to HG7881's A-1B terminal
 int motorBPin_A = 4; // Arduino digital 4 connected to HG7881's B-1A terminal
