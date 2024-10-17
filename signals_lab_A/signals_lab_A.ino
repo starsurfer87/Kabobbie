@@ -1,6 +1,6 @@
 // Ultrasonic sensor and motor control pins
 int trigPin = 11;    // Trigger
-int echoPin = 12;    // Echo
+int echoPin = 12;    // Echo TODO: check if this needs to be changed
 
 // Motor control pins
 int motorAPin_A = 8; // Arduino digital 8 connected to HG7881's A-1A terminal
@@ -9,7 +9,8 @@ int motorBPin_A = 4; // Arduino digital 4 connected to HG7881's B-1A terminal
 int motorBPin_B = 5; // Arduino digital 5 connected to HG7881's B-1B terminal
 
 // Distance variables
-int duration, dist, error;
+long duration;
+int dist, error;
 int SET_POINT = 20;  // Stop the car if an obstacle is closer than this distance (cm)
 
 // Minimum power required for motion

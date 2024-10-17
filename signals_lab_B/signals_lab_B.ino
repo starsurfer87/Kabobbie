@@ -1,11 +1,11 @@
 // Ultrasonic sensor and motor control pins
 int trigPinL = 11;   // Trigger for left ultrasonic sensor
-int echoPinL = 12;   // Echo for left ultrasonic sensor
+int echoPinL = 12;   // Echo for left ultrasonic sensor TODO: check if this needs to be changed
 int trigPinR = 3;    // Trigger for right ultrasonic sensor
 int echoPinR = 6;    // Echo for right ultrasonic sensor
 
 // Motor control pins
-// A is right wheel, B is left wheel
+// A is left wheel, B is right wheel TODO: swap labels on Kabobbie to reflect this
 int motorAPin_A = 8; // Arduino digital 8 connected to HG7881's A-1A terminal
 int motorAPin_B = 9; // Arduino digital 9 connected to HG7881's A-1B terminal
 int motorBPin_A = 4; // Arduino digital 4 connected to HG7881's B-1A terminal
@@ -61,21 +61,6 @@ void loop() {
 // takes a value between [-100, 100] and set power output of right motor accordingly
 void setRightMotor(int val) {
   if (val == 0) {
-    analogWrite(motorAPin_B, LOW);
-  } else if (val > 0) {
-    int outputMapped = map(val, 0, 100, BASE, 255);
-    analogWrite(motorAPin_A, LOW);
-    analogWrite(motorAPin_B, outputMapped);
-  } else {
-    int outputMapped = map(val, 0, -100, BASE, 255);
-    analogWrite(motorAPin_A, 255);
-    analogWrite(motorAPin_B, invert(outputMapped));
-  }
-}
-
-// takes a value between [-100, 100] and set power output of left motor accordingly
-void setLeftMotor(int val) {
-  if (val == 0) {
     analogWrite(motorBPin_B, LOW);
   } else if (val > 0) {
     int outputMapped = map(val, 0, 100, BASE, 255);
@@ -85,6 +70,21 @@ void setLeftMotor(int val) {
     int outputMapped = map(val, 0, -100, BASE, 255);
     analogWrite(motorBPin_A, 255);
     analogWrite(motorBPin_B, invert(outputMapped));
+  }
+}
+
+// takes a value between [-100, 100] and set power output of left motor accordingly
+void setLeftMotor(int val) {
+  if (val == 0) {
+    analogWrite(motorAPin_B, LOW);
+  } else if (val > 0) {
+    int outputMapped = map(val, 0, 100, BASE, 255);
+    analogWrite(motorAPin_A, LOW);
+    analogWrite(motorAPin_B, outputMapped);
+  } else {
+    int outputMapped = map(val, 0, -100, BASE, 255);
+    analogWrite(motorAPin_A, 255);
+    analogWrite(motorAPin_B, invert(outputMapped));
   }
 }
 
@@ -98,7 +98,7 @@ void measureDistanceL() {
   digitalWrite(trigPinL, LOW);
 
   // Measure the echo signal duration
-  int duration = pulseIn(echoPinL, HIGH);
+  long duration = pulseIn(echoPinL, HIGH);
 
   // Convert the duration to distance in centimeters
   distL = (duration / 2) / 29.1;
@@ -123,7 +123,7 @@ void measureDistanceR() {
   digitalWrite(trigPinR, LOW);
 
   // Measure the echo signal duration
-  int duration = pulseIn(echoPinR, HIGH);
+  long duration = pulseIn(echoPinR, HIGH);
 
   // Convert the duration to distance in centimeters
   distR = (duration / 2) / 29.1;
