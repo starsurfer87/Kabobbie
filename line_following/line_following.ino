@@ -10,11 +10,13 @@ const int POWER = 15; // standard power output to motors, must be in [-100,100]
 const int BASE = 120; // Minimum power required for motion
 
 // Photocell variables and constants
-int photocellValR = 0;
 int photocellValL = 0;
+int photocellValM = 0;
+int photocellValR = 0;
 const int photocellPinL = A0;
-const int photocellPinR = A1;
-const int THRESHOLD = 700; 
+const int photocellPinM = A1;
+const int photocellPinR = A2;
+const int THRESHOLD = 650; 
 
 void setup() {
   // Initialize serial communication
@@ -30,22 +32,22 @@ void setup() {
 void loop() {
   readPhotocells();
 
-  if (!onLine(photocellValR) && !onLine(photocellValL)) {
+  if (!onLine(photocellValL) && onLine(photocellValM) && !onLine(photocellValR) ) {
     setRightMotor(POWER);
     setLeftMotor(POWER);
-    //Serial.println("GO STRAIGHT");
-  } else if (onLine(photocellValR) && !onLine(photocellValL)) {
+    Serial.println("GO STRAIGHT");
+  } else if (!onLine(photocellValL) && onLine(photocellValR) ) {
     setRightMotor(0);
     setLeftMotor(POWER);
-    //Serial.println("TURN RIGHT");
-  } else if (!onLine(photocellValR) && onLine(photocellValL)) {
+    Serial.println("TURN RIGHT");
+  } else if (onLine(photocellValL) && !onLine(photocellValR)) {
     setRightMotor(POWER);
     setLeftMotor(0);
-    //Serial.println("TURN LEFT");
+    Serial.println("TURN LEFT");
   } else {
     setRightMotor(0);
     setLeftMotor(0);
-    //Serial.println("PANIC");
+    Serial.println("PANIC");
   }
 
   delay(250);  // Wait a bit before the next reading
@@ -53,12 +55,17 @@ void loop() {
 
 // read values from right and left photocellss
 void readPhotocells() {
-  photocellValR = analogRead(photocellPinR);
+  
   photocellValL = analogRead(photocellPinL);
-  Serial.print("right: ");
-  Serial.println(photocellValR);
+  photocellValM = analogRead(photocellPinM);
+  photocellValR = analogRead(photocellPinR);
+  
   Serial.print("left: ");
   Serial.println(photocellValL);
+  Serial.print("middle: ");
+  Serial.println(photocellValM);
+  Serial.print("right: ");
+  Serial.println(photocellValR);
 }
 
 // returns true if phorocell detects line, false otherwise
