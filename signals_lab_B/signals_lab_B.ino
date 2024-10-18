@@ -27,6 +27,8 @@ void setup() {
   // Set up ultrasonic sensor pins
   pinMode(trigPinL, OUTPUT);
   pinMode(echoPinL, INPUT);
+  pinMode(trigPinR, OUTPUT);
+  pinMode(echoPinR, INPUT);
 
   // Set up motor pins as outputs
   pinMode(motorAPin_A, OUTPUT);
