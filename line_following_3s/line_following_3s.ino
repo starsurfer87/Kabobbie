@@ -76,6 +76,7 @@ bool onLine(int photocellVal) {
 // takes a value between [-100, 100] and set power output of right motor accordingly
 void setRightMotor(int val) {
   if (val == 0) {
+    analogWrite(motorBPin_A, LOW);
     analogWrite(motorBPin_B, LOW);
   } else if (val > 0) {
     int outputMapped = map(val, 0, 100, BASE, 255);
@@ -91,6 +92,7 @@ void setRightMotor(int val) {
 // takes a value between [-100, 100] and set power output of left motor accordingly
 void setLeftMotor(int val) {
   if (val == 0) {
+    analogWrite(motorAPin_A, LOW);
     analogWrite(motorAPin_B, LOW);
   } else if (val > 0) {
     int outputMapped = map(val, 0, 100, BASE, 255);

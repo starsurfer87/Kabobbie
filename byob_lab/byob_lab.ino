@@ -14,6 +14,10 @@ void setup(){
    * When program starts set Arduino pinmode for 8 and 9 digital to be OUTPUT
    * so we can use analogWrite to output values from 0 to 255 (0-5V) (PWM) 
    */
+  
+  // Initialize serial communication
+  Serial.begin(9600);
+  
   pinMode(motorAPin_A, OUTPUT); // A direction
   pinMode(motorAPin_B, OUTPUT); // A speed
   
@@ -57,6 +61,7 @@ void forward() {
   // set direction 
   analogWrite(motorAPin_A, LOW);
   analogWrite(motorBPin_A, LOW);
+  Serial.println("FORWARD");
 
   // increase speed
   for(int i= BASE; i<=255; i++){
@@ -70,6 +75,7 @@ void backward() {
   // set direction
   analogWrite(motorAPin_A, 255);
   analogWrite(motorBPin_A, 255);
+  Serial.println("BACK");
 
   // increase speed
   for(int i=BASE; i<=255; i++){
@@ -84,6 +90,7 @@ void turnLeft() {
   analogWrite(motorAPin_A, LOW);
   analogWrite(motorBPin_A, LOW);
   analogWrite(motorAPin_B, LOW);
+  Serial.println("LEFT");
 
   // increase speed
   for(int i= BASE; i<=255; i++){
@@ -97,6 +104,7 @@ void turnRight() {
   analogWrite(motorAPin_A, LOW);
   analogWrite(motorBPin_A, LOW);
   analogWrite(motorBPin_B, LOW);
+  Serial.println("RIGHT");
 
   // increase speed
   for(int i= BASE; i<=255; i++){

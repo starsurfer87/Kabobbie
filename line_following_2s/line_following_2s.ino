@@ -11,10 +11,8 @@ const int BASE = 120; // Minimum power required for motion
 
 // Photocell variables and constants
 int photocellValL = 0;
-int photocellValM = 0;
 int photocellValR = 0;
 const int photocellPinL = A0;
-const int photocellPinM = A1;
 const int photocellPinR = A2;
 const int THRESHOLD = 650; 
 
@@ -32,7 +30,7 @@ void setup() {
 void loop() {
   readPhotocells();
 
-  if (!onLine(photocellValL) && onLine(photocellValM) && !onLine(photocellValR) ) {
+  if (!onLine(photocellValL) && !onLine(photocellValR) ) {
     setRightMotor(POWER);
     setLeftMotor(POWER);
     Serial.println("GO STRAIGHT");
@@ -57,13 +55,10 @@ void loop() {
 void readPhotocells() {
   
   photocellValL = analogRead(photocellPinL);
-  photocellValM = analogRead(photocellPinM);
   photocellValR = analogRead(photocellPinR);
   
   Serial.print("left: ");
   Serial.println(photocellValL);
-  Serial.print("middle: ");
-  Serial.println(photocellValM);
   Serial.print("right: ");
   Serial.println(photocellValR);
 }
