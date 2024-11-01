@@ -16,6 +16,14 @@ const int photocellPinL = A0;
 const int photocellPinR = A2;
 const int THRESHOLD = 550; 
 
+// History
+enum Motion {
+  STRAIGHT,
+  LEFT,
+  RIGHT
+};
+Motion prevChoice = STRAIGHT;
+
 void setup() {
   // Initialize serial communication
   Serial.begin(9600);
@@ -33,19 +41,32 @@ void loop() {
   if (!onLine(photocellValL) && !onLine(photocellValR)) {
     setRightMotor(POWER);
     setLeftMotor(POWER);
+    prevChoice = STRAIGHT;
     Serial.println("\tGO STRAIGHT");
   } else if (!onLine(photocellValL) && onLine(photocellValR) ) {
     setRightMotor(0);
     setLeftMotor(POWER);
+    prevChoice = RIGHT;
     Serial.println("\tTURN RIGHT");
   } else if (onLine(photocellValL) && !onLine(photocellValR)) {
     setRightMotor(POWER);
     setLeftMotor(0);
+    prevChoice = LEFT;
     Serial.println("\tTURN LEFT");
   } else {
-    setRightMotor(0);
-    setLeftMotor(0);
-    Serial.println("\tPANIC");
+    if (prevChoice == STRAIGHT) {
+      setRightMotor(POWER-5);
+      setLeftMotor(POWER-5);
+      Serial.println("\tTENTATIVE GO STRAIGHT");
+    } else if (prevChoice == RIGHT) {
+      setRightMotor(0);
+      setLeftMotor(POWER-5);
+      Serial.println("\tTENTATIVE RIGHT");
+    } else if (prevChoice == LEFT) {
+      setRightMotor(POWER-5);
+      setLeftMotor(0);
+      Serial.println("\tTENTATIVE LEFT");
+    }
   }
 
   delay(250);  // Wait a bit before the next reading
