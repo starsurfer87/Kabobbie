@@ -6,7 +6,7 @@ const int motorBPin_A = 4; // Arduino digital 4 connected to HG7881's B-1A termi
 const int motorBPin_B = 5; // Arduino digital 5 connected to HG7881's B-1B terminal
 
 // Motor constants
-const int POWER = 15; // standard power output to motors, must be in [-100,100]
+const int POWER = 10; // standard power output to motors, must be in [-100,100]
 const int BASE = 120; // Minimum power required for motion
 
 // Photocell variables and constants
@@ -55,9 +55,9 @@ void loop() {
     Serial.println("\tTURN LEFT");
   } else {
     if (prevChoice == STRAIGHT) {
-      setRightMotor(POWER-5);
-      setLeftMotor(POWER-5);
-      Serial.println("\tTENTATIVE GO STRAIGHT");
+      setRightMotor(0);
+      setLeftMotor(0);
+      Serial.println("\tPANIC");
     } else if (prevChoice == RIGHT) {
       setRightMotor(0);
       setLeftMotor(POWER-5);
