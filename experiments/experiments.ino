@@ -12,9 +12,15 @@ const int BASE = 120; // Minimum power required for motion
 // Photocell variables and constants
 int photocellValL = 0;
 int photocellValR = 0;
+
 const int photocellPinL = A0;
 const int photocellPinR = A2;
-const int THRESHOLD = 550; 
+
+const int THRESHOLD = 710; 
+
+int photocellValL_last = 0;
+int photocellValR_last = 0;
+
 
 void setup() {
   // Initialize serial communication
@@ -30,22 +36,29 @@ void setup() {
 void loop() {
   readPhotocells();
 
+    // setRightMotor(POWER);
+    // setLeftMotor(POWER);
+
   if (!onLine(photocellValL) && !onLine(photocellValR)) {
-    setRightMotor(POWER);
-    setLeftMotor(POWER);
-    Serial.println("\tGO STRAIGHT");
-  } else if (!onLine(photocellValL) && onLine(photocellValR) ) {
-    setRightMotor(0);
-    setLeftMotor(POWER);
-    Serial.println("\tTURN RIGHT");
+    straight();
+    //setRightMotor(POWER);
+    //setLeftMotor(POWER);
+    Serial.print("GO STRAIGHT");
+  } else if (!onLine(photocellValL) && onLine(photocellValR)) {
+    right();
+    //setRightMotor(0);
+    //setLeftMotor(POWER);
+    Serial.print("TURN RIGHT");
   } else if (onLine(photocellValL) && !onLine(photocellValR)) {
-    setRightMotor(POWER);
-    setLeftMotor(0);
-    Serial.println("\tTURN LEFT");
+    left();
+    //setRightMotor(POWER);
+    // setLeftMotor(0);
+    Serial.print("TURN LEFT");
   } else {
-    setRightMotor(0);
-    setLeftMotor(0);
-    Serial.println("\tPANIC");
+    stop();
+    // setRightMotor(0);
+    // setLeftMotor(0);
+    Serial.print("PANIC!!!!!!!!!!");
   }
 
   delay(250);  // Wait a bit before the next reading
@@ -56,51 +69,74 @@ void readPhotocells() {
   
   photocellValL = analogRead(photocellPinL);
   photocellValR = analogRead(photocellPinR);
+
   
-  Serial.print("left: ");
+  int photocellValL_avg = (photocellValL + photocellValL_last) / 2;
+  int photocellValR_avg = (photocellValR + photocellValR_last) / 2;
+
+  photocellValL_last = photocellValL_avg;
+  photocellValR_last = photocellValR_avg;
+  
+  Serial.print("\t\tleft: ");
   Serial.print(photocellValL);
   Serial.print("\tright: ");
   Serial.print(photocellValR);
+  
+  Serial.print("\tleft avg: ");
+  Serial.print(photocellValL_avg);
+  Serial.print("\tright avt: ");
+  Serial.println(photocellValR_avg);
+
+
 }
 
 // returns true if phorocell detects line, false otherwise
 bool onLine(int photocellVal) {
   return photocellVal > THRESHOLD;
 }
-
 // takes a value between [-100, 100] and set power output of right motor accordingly
 void setRightMotor(int val) {
-  if (val == 0) {
-    digitalWrite(motorBPin_A, HIGH);
-    digitalWrite(motorBPin_B, HIGH);
-  } else if (val > 0) {
-    int outputMapped = map(val, 0, 100, BASE, 255);
-    digitalWrite(motorBPin_A, LOW);
-    analogWrite(motorBPin_B, outputMapped);
-  } else {
-    int outputMapped = map(-val, 0, 100, BASE, 255);
-    digitalWrite(motorBPin_A, HIGH);
-    analogWrite(motorBPin_B, invert(outputMapped));
-  }
+  digitalWrite(motorBPin_B, HIGH);
+  digitalWrite(motorBPin_A, HIGH);
 }
 
 // takes a value between [-100, 100] and set power output of left motor accordingly
 void setLeftMotor(int val) {
-  if (val == 0) {
-    digitalWrite(motorAPin_A, HIGH);
-    digitalWrite(motorAPin_B, HIGH);
-  } else if (val > 0) {
-    int outputMapped = map(val, 0, 100, BASE, 255);
-    digitalWrite(motorAPin_A, LOW);
-    analogWrite(motorAPin_B, outputMapped);
-  } else {
-    int outputMapped = map(-val, 0, 100, BASE, 255);
-    digitalWrite(motorAPin_A, HIGH);
-    analogWrite(motorAPin_B, invert(outputMapped));
-  }
+  digitalWrite(motorAPin_B, HIGH);
+  digitalWrite(motorAPin_A, HIGH);
 }
 
-// Inverts value for backward motion
-int invert(int input) {
-  return 255 - input;
+void left() {
+  analogWrite(motorAPin_B, HIGH);
+  digitalWrite(motorAPin_A, LOW);
+
+  analogWrite(motorBPin_B, HIGH);
+  digitalWrite(motorBPin_A, HIGH);
+}
+
+void straight() {
+  analogWrite(motorAPin_B, HIGH);
+  digitalWrite(motorAPin_A, LOW);
+
+  analogWrite(motorBPin_B, HIGH);
+  digitalWrite(motorBPin_A, LOW);
+
+}
+
+
+void right() {
+  analogWrite(motorAPin_B, HIGH);
+  digitalWrite(motorAPin_A, HIGH);
+
+  analogWrite(motorBPin_B, HIGH);
+  digitalWrite(motorBPin_A, LOW);
+}
+
+
+void stop() {
+  digitalWrite(motorAPin_B, HIGH);
+  digitalWrite(motorAPin_A, HIGH);
+
+  digitalWrite(motorBPin_B, HIGH);
+  digitalWrite(motorBPin_A, HIGH);
 }

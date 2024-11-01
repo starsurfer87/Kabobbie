@@ -59,8 +59,8 @@ int invertOurValue(int input) {
 
 void forward() {
   // set direction 
-  analogWrite(motorAPin_A, LOW);
-  analogWrite(motorBPin_A, LOW);
+  digitalWrite(motorAPin_A, LOW);
+  digitalWrite(motorBPin_A, LOW);
   Serial.println("FORWARD");
 
   // increase speed
@@ -73,8 +73,8 @@ void forward() {
 
 void backward() {
   // set direction
-  analogWrite(motorAPin_A, 255);
-  analogWrite(motorBPin_A, 255);
+  digitalWrite(motorAPin_A, HIGH);
+  digitalWrite(motorBPin_A, HIGH);
   Serial.println("BACK");
 
   // increase speed
@@ -87,9 +87,9 @@ void backward() {
 
 void turnLeft() {
   // set direction 
-  analogWrite(motorAPin_A, LOW);
-  analogWrite(motorBPin_A, LOW);
-  analogWrite(motorAPin_B, LOW);
+  digitalWrite(motorAPin_A, HIGH);
+  digitalWrite(motorBPin_A, LOW);
+  digitalWrite(motorAPin_B, HIGH);
   Serial.println("LEFT");
 
   // increase speed
@@ -101,9 +101,9 @@ void turnLeft() {
 
 void turnRight() {
    // set direction 
-  analogWrite(motorAPin_A, LOW);
-  analogWrite(motorBPin_A, LOW);
-  analogWrite(motorBPin_B, LOW);
+  digitalWrite(motorAPin_A, LOW);
+  digitalWrite(motorBPin_A, HIGH);
+  digitalWrite(motorBPin_B, HIGH);
   Serial.println("RIGHT");
 
   // increase speed
@@ -114,9 +114,9 @@ void turnRight() {
 }
 
 void stop() {
-  analogWrite(motorAPin_A, LOW);
-  analogWrite(motorAPin_B, LOW);
-  analogWrite(motorBPin_A, LOW);
-  analogWrite(motorBPin_B, LOW);
+  digitalWrite(motorAPin_A, HIGH);
+  digitalWrite(motorAPin_B, HIGH);
+  digitalWrite(motorBPin_A, HIGH);
+  digitalWrite(motorBPin_B, HIGH);
 }
 
