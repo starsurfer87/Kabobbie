@@ -1,8 +1,8 @@
 // Ultrasonic sensor and motor control pins
-int trigPinL = 11;   // Trigger for left ultrasonic sensor
+int trigPinL = 12;   // Trigger for left ultrasonic sensor
 int echoPinL = 10;   // Echo for left ultrasonic sensor 
-int trigPinR = 3;    // Trigger for right ultrasonic sensor
-int echoPinR = 6;    // Echo for right ultrasonic sensor
+int trigPinR = 7;    // Trigger for right ultrasonic sensor
+int echoPinR = 3;    // Echo for right ultrasonic sensor
 
 // Motor control pins
 // A is left wheel, B is right wheel 
@@ -38,21 +38,21 @@ void setup() {
 }
 
 void loop() {
-  measureDistanceR();
   measureDistanceL();
+  measureDistanceR();
 
   if (abs(distL-distR) < BUFF) {
     setRightMotor(POWER);
     setLeftMotor(POWER);
-    Serial.println("GO STRAIGHT");
+    Serial.println("\tGO STRAIGHT");
   } else if (distR > distL) {
     setRightMotor(0);
     setLeftMotor(POWER);
-    Serial.println("TURN RIGHT");
+    Serial.println("\tTURN RIGHT");
   } else if (distR < distL) {
     setRightMotor(POWER);
     setLeftMotor(0);
-    Serial.println("TURN LEFT");
+    Serial.println("\tTURN LEFT");
   }
 
 
@@ -63,14 +63,15 @@ void loop() {
 // takes a value between [-100, 100] and set power output of right motor accordingly
 void setRightMotor(int val) {
   if (val == 0) {
-    analogWrite(motorBPin_B, LOW);
+    digitalWrite(motorBPin_A, HIGH);
+    digitalWrite(motorBPin_B, HIGH);
   } else if (val > 0) {
     int outputMapped = map(val, 0, 100, BASE, 255);
-    analogWrite(motorBPin_A, LOW);
+    digitalWrite(motorBPin_A, LOW);
     analogWrite(motorBPin_B, outputMapped);
   } else {
-    int outputMapped = map(val, 0, -100, BASE, 255);
-    analogWrite(motorBPin_A, 255);
+    int outputMapped = map(-val, 0, 100, BASE, 255);
+    digitalWrite(motorBPin_A, HIGH);
     analogWrite(motorBPin_B, invert(outputMapped));
   }
 }
@@ -78,14 +79,15 @@ void setRightMotor(int val) {
 // takes a value between [-100, 100] and set power output of left motor accordingly
 void setLeftMotor(int val) {
   if (val == 0) {
-    analogWrite(motorAPin_B, LOW);
+    digitalWrite(motorAPin_A, HIGH);
+    digitalWrite(motorAPin_B, HIGH);
   } else if (val > 0) {
     int outputMapped = map(val, 0, 100, BASE, 255);
-    analogWrite(motorAPin_A, LOW);
+    digitalWrite(motorAPin_A, LOW);
     analogWrite(motorAPin_B, outputMapped);
   } else {
-    int outputMapped = map(val, 0, -100, BASE, 255);
-    analogWrite(motorAPin_A, 255);
+    int outputMapped = map(-val, 0, 100, BASE, 255);
+    digitalWrite(motorAPin_A, HIGH);
     analogWrite(motorAPin_B, invert(outputMapped));
   }
 }
@@ -109,10 +111,7 @@ void measureDistanceL() {
   // Output the distances to the Serial Monitor
   Serial.print("LEFT: ");
   Serial.print(distL);
-  Serial.println(" cm");
-
-
-
+  Serial.print(" cm");
 }
 
 // Measure distance using the ultrasonic sensor
@@ -132,9 +131,9 @@ void measureDistanceR() {
   //errorR = SET_POINT - distR;
 
   // Output the distance to the Serial Monitor
-  Serial.print("RIGHT: ");
+  Serial.print("\tRIGHT: ");
   Serial.print(distR);
-  Serial.println(" cm");
+  Serial.print(" cm");
 }
 
 // Inverts value for backward motion
