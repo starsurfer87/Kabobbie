@@ -12,11 +12,12 @@ int motorBPin_A = 4; // Arduino digital 4 connected to HG7881's B-1A terminal
 int motorBPin_B = 5; // Arduino digital 5 connected to HG7881's B-1B terminal
 
 // Distance variables
-int distL, distR;
+int currDistL, currDistR, prevDistL, prevDistR, filteredDistL, filteredDistR = -1;
 int errorL, errorR;
 int SET_POINT = 15;  // Stop the car if an obstacle is closer than this distance (cm)
 int BUFF = 2; // allowed difference between distL and distR, must be a positive integer -- CAN FINE TUNE
 int POWER = 15; // standard power output to motors, should be in [-100,100] -- CAN FINE TUNE
+float ALPHA = 0.8;
 
 // Minimum power required for motion
 int BASE = 120;
@@ -46,9 +47,6 @@ void setup() {
 
 void loop() {
   measureDistanceL();
-  Serial.print("\tLeft Error: ");
-  Serial.print(errorL);
-  Serial.print(" cm");
 
   if (errorL > 0 && dir == IN) {
     dir = OUT;
@@ -118,37 +116,47 @@ void measureDistanceL() {
   // Measure the echo signal duration
   long duration = pulseIn(echoPinL, HIGH);
 
-  // Convert the duration to distance in centimeters
-  distL = (duration / 2) / 29.1;
-  errorL = SET_POINT - distL;
+  // Calculate distance based on new measurement and prev value
+  prevDistL = filteredDistL;
+  currDistL = (duration / 2) / 29.1;
+  if (prevDistL >= 0) {
+    filteredDistL = ALPHA*currDistL + (1-ALPHA)*prevDistL;
+  } else {
+    filteredDistL = currDistL;
+  }
+  errorL = SET_POINT - filteredDistL;
 
   // Output the distances to the Serial Monitor
   Serial.print("LEFT: ");
-  Serial.print(distL);
+  Serial.print(filteredDistL);
+  Serial.print(" cm");
+
+  Serial.print("\tLeft Error: ");
+  Serial.print(errorL);
   Serial.print(" cm");
 }
 
 // Measure distance using the ultrasonic sensor
-void measureDistanceR() {
-  // Send a 10-microsecond pulse to trigger the ultrasonic sensor
-  digitalWrite(trigPinR, LOW);
-  delayMicroseconds(5);
-  digitalWrite(trigPinR, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPinR, LOW);
+// void measureDistanceR() {
+//   // Send a 10-microsecond pulse to trigger the ultrasonic sensor
+//   digitalWrite(trigPinR, LOW);
+//   delayMicroseconds(5);
+//   digitalWrite(trigPinR, HIGH);
+//   delayMicroseconds(10);
+//   digitalWrite(trigPinR, LOW);
 
-  // Measure the echo signal duration
-  long duration = pulseIn(echoPinR, HIGH);
+//   // Measure the echo signal duration
+//   long duration = pulseIn(echoPinR, HIGH);
 
-  // Convert the duration to distance in centimeters
-  distR = (duration / 2) / 29.1;
-  //errorR = SET_POINT - distR;
+//   // Convert the duration to distance in centimeters
+//   distR = (duration / 2) / 29.1;
+//   //errorR = SET_POINT - distR;
 
-  // Output the distance to the Serial Monitor
-  Serial.print("\tRIGHT: ");
-  Serial.print(distR);
-  Serial.print(" cm");
-}
+//   // Output the distance to the Serial Monitor
+//   Serial.print("\tRIGHT: ");
+//   Serial.print(distR);
+//   Serial.print(" cm");
+// }
 
 // Inverts value for backward motion
 int invert(int input) {

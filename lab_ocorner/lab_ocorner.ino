@@ -12,11 +12,12 @@ int motorBPin_A = 4; // Arduino digital 4 connected to HG7881's B-1A terminal
 int motorBPin_B = 5; // Arduino digital 5 connected to HG7881's B-1B terminal
 
 // Distance variables
-int distL, distR;
+int currDistL, currDistR, prevDistL, prevDistR, filteredDistL, filteredDistR;
 int errorL, errorR;
-int SET_POINT = 15;  // Stop the car if an obstacle is closer than this distance (cm)
+int SET_POINT = 7;  // Stop the car if an obstacle is closer than this distance (cm)
 int BUFF = 2; // allowed difference between distL and distR, must be a positive integer -- CAN FINE TUNE
-int POWER = 15; // standard power output to motors, should be in [-100,100] -- CAN FINE TUNE
+int POWER = 10; // standard power output to motors, should be in [-100,100] -- CAN FINE TUNE
+float ALPHA = 1;
 
 // Minimum power required for motion
 int BASE = 120;
@@ -42,20 +43,29 @@ void setup() {
   pinMode(motorAPin_B, OUTPUT);
   pinMode(motorBPin_A, OUTPUT);
   pinMode(motorBPin_B, OUTPUT);
+
+  // Take some initial sensor readings
+  filteredDistL = -1;
+  filteredDistR = -1;
+
+  for (int i=0; i<3; i++) {
+    measureDistanceL();
+    Serial.println();
+  }
+  Serial.println("START");
 }
 
 void loop() {
   measureDistanceL();
-  Serial.print("\tLeft Error: ");
-  Serial.print(errorL);
-  Serial.println(" cm");
 
   if (errorL < 0) {
-    setRightMotor(15);
+    setRightMotor(POWER-5);
     setLeftMotor(0);
+    Serial.println("\tMoving In");
   } else {
     setRightMotor(0);
-    setLeftMotor(15);
+    setLeftMotor(POWER);
+    Serial.println("\tMoving Out");
   }
 
   delay(250);  // Wait a bit before the next reading
@@ -106,37 +116,56 @@ void measureDistanceL() {
   // Measure the echo signal duration
   long duration = pulseIn(echoPinL, HIGH);
 
-  // Convert the duration to distance in centimeters
-  distL = (duration / 2) / 29.1;
-  errorL = SET_POINT - distL;
+  // Calculate distance based on new measurement and prev value
+  prevDistL = filteredDistL;
+  currDistL = (duration / 2) / 29.1;
+  if (prevDistL >= 0) {
+    filteredDistL = ALPHA*currDistL + (1-ALPHA)*prevDistL;
+  } else {
+    filteredDistL = currDistL;
+    Serial.print("TEST");
+  }
+  errorL = SET_POINT - filteredDistL;
 
   // Output the distances to the Serial Monitor
-  Serial.print("LEFT: ");
-  Serial.print(distL);
+  Serial.print("Current Left: ");
+  Serial.print(currDistL);
+  Serial.print(" cm");
+
+  Serial.print("\tFiltered Left: ");
+  Serial.print(filteredDistL);
+  Serial.print(" cm");
+
+  Serial.print("\tPrevious Left: ");
+  Serial.print(prevDistL);
+  Serial.print(" cm");
+
+  Serial.print("\tLeft Error: ");
+  Serial.print(errorL);
   Serial.print(" cm");
 }
 
 // Measure distance using the ultrasonic sensor
-void measureDistanceR() {
-  // Send a 10-microsecond pulse to trigger the ultrasonic sensor
-  digitalWrite(trigPinR, LOW);
-  delayMicroseconds(5);
-  digitalWrite(trigPinR, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPinR, LOW);
+// void measureDistanceR() {
+//   // Send a 10-microsecond pulse to trigger the ultrasonic sensor
+//   digitalWrite(trigPinR, LOW);
+//   delayMicroseconds(5);
+//   digitalWrite(trigPinR, HIGH);
+//   delayMicroseconds(10);
+//   digitalWrite(trigPinR, LOW);
 
-  // Measure the echo signal duration
-  long duration = pulseIn(echoPinR, HIGH);
+//   // Measure the echo signal duration
+//   long duration = pulseIn(echoPinR, HIGH);
 
-  // Convert the duration to distance in centimeters
-  distR = (duration / 2) / 29.1;
-  //errorR = SET_POINT - distR;
+//   // Convert the duration to distance in centimeters
+//   distR = (duration / 2) / 29.1;
+//   //errorR = SET_POINT - distR;
 
-  // Output the distance to the Serial Monitor
-  Serial.print("\tRIGHT: ");
-  Serial.print(distR);
-  Serial.print(" cm");
-}
+//   // Output the distance to the Serial Monitor
+//   Serial.print("\tRIGHT: ");
+//   Serial.print(distR);
+//   Serial.print(" cm");
+// }
 
 // Inverts value for backward motion
 int invert(int input) {
