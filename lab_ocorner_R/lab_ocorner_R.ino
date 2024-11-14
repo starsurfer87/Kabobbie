@@ -56,15 +56,15 @@ void setup() {
 }
 
 void loop() {
-  measureDistanceL();
+  measureDistanceR();
 
-  if (errorL < 0) {
-    setRightMotor(POWER-5);
-    setLeftMotor(0);
-    Serial.println("\tMoving In");
-  } else {
+  if (errorR < 0) {
     setRightMotor(0);
     setLeftMotor(POWER);
+    Serial.println("\tMoving In");
+  } else {
+    setRightMotor(POWER);
+    setLeftMotor(0);
     Serial.println("\tMoving Out");
   }
 
@@ -142,6 +142,47 @@ void measureDistanceL() {
 
   Serial.print("\tLeft Error: ");
   Serial.print(errorL);
+  Serial.print(" cm");
+}
+
+// Measure distance using the ultrasonic sensor
+void measureDistanceR() {
+  // Send a 10-microsecond pulse to trigger the ultrasonic sensor
+  digitalWrite(trigPinR, LOW);
+  delayMicroseconds(5);
+  digitalWrite(trigPinR, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPinR, LOW);
+
+  // Measure the echo signal duration
+  long duration = pulseIn(echoPinR, HIGH);
+
+  // Calculate distance based on new measurement and prev value
+  prevDistR = filteredDistR;
+  currDistR = (duration / 2) / 29.1;
+  if (prevDistR >= 0) {
+    filteredDistR = ALPHA*currDistR + (1-ALPHA)*prevDistR;
+  } else {
+    filteredDistR = currDistR;
+    Serial.print("TEST");
+  }
+  errorR = SET_POINT - filteredDistR;
+
+  // Output the distances to the Serial Monitor
+  Serial.print("Current Right: ");
+  Serial.print(currDistR);
+  Serial.print(" cm");
+
+  Serial.print("\tFiltered Right: ");
+  Serial.print(filteredDistR);
+  Serial.print(" cm");
+
+  Serial.print("\tPrevious Right: ");
+  Serial.print(prevDistR);
+  Serial.print(" cm");
+
+  Serial.print("\tRight Error: ");
+  Serial.print(errorR);
   Serial.print(" cm");
 }
 
