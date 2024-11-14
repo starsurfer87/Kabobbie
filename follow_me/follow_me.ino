@@ -11,8 +11,11 @@ int motorBPin_A = 4; // Arduino digital 4 connected to HG7881's B-1A terminal
 int motorBPin_B = 5; // Arduino digital 5 connected to HG7881's B-1B terminal
 
 // Distance variables
-int distF, errorF;
-int SET_POINT = 10;  // Stop the car if an obstacle is closer than this distance (cm)
+int distF, distR, errorF, errorR;
+int SET_POINT_F = 10;  // Stop the car if an obstacle is closer than this distance (cm)
+int SET_POINT_R = 10;
+int BUFF_F = 2;
+int BUFF_R = 2;
 
 // Minimum power required for motion
 int BASE = 120;
@@ -37,15 +40,24 @@ void setup() {
 void loop() {
   // Measure the distance
   measureDistanceF();
+  delay(10);
+  measureDistanceR();
 
-  // If no obstacle within STOP_DISTANCE, move forward; otherwise, stop
-  if (errorF > 300) {
+  if (errorR > BUFF_R) {
+    //RIGHT WHEEL TURNS
+    setRightMotor(15);
+    setLeftMotor(0);
+  } else if (errorR < -BUFF_R) {
+    // LEFT WHEEL TURNS
+    setRightMotor(0);
+    setLeftMotor(15);
+  } else if (errorF > 300) {
     setRightMotor(-100);
     setLeftMotor(-100);
   } else if (errorF < -300) {
     setRightMotor(100);
     setLeftMotor(100);
-  } else if (abs(errorF) < 2) {
+  } else if (abs(errorF) < BUFF_F) {
     setRightMotor(0);
     setLeftMotor(0);
   } else {
@@ -70,10 +82,33 @@ void measureDistanceF() {
 
   // Convert the duration to distance in centimeters
   distF = (duration / 2) / 29.1;
-  errorF = SET_POINT - distF;
+  errorF = SET_POINT_F - distF;
 
   // Output the distance to the Serial Monitor
+  Serial.print("Front: ");
   Serial.print(distF);
+  Serial.print(" cm");
+}
+
+// Measure distance using the ultrasonic sensor
+void measureDistanceR() {
+  // Send a 10-microsecond pulse to trigger the ultrasonic sensor
+  digitalWrite(trigPinR, LOW);
+  delayMicroseconds(5);
+  digitalWrite(trigPinR, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPinR, LOW);
+
+  // Measure the echo signal duration
+  long duration = pulseIn(echoPinR, HIGH);
+
+  // Convert the duration to distance in centimeters
+  distR = (duration / 2) / 29.1;
+  errorR = SET_POINT_R - distR;
+
+  // Output the distance to the Serial Monitor
+  Serial.print("\tRight: ");
+  Serial.print(distR);
   Serial.println(" cm");
 }
 
