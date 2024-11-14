@@ -1,5 +1,5 @@
-int trigPinL = 7;   // Trigger for left ultrasonic sensor
-int echoPinL = 3;   // Echo for left ultrasonic sensor 
+int trigPinL = 12;   // Trigger for left ultrasonic sensor
+int echoPinL = 10;   // Echo for left ultrasonic sensor 
 int distL, distR;
 
 void setup() {
