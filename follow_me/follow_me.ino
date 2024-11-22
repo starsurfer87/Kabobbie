@@ -13,9 +13,9 @@ int motorBPin_B = 5; // Arduino digital 5 connected to HG7881's B-1B terminal
 // Distance variables
 int distF, distR, errorF, errorR;
 int SET_POINT_F = 10;  // Stop the car if an obstacle is closer than this distance (cm)
-int SET_POINT_R = 10;
+int SET_POINT_R = 15;
 int BUFF_F = 2;
-int BUFF_R = 2;
+int BUFF_R = 5;
 
 // Minimum power required for motion
 int BASE = 120;
@@ -40,17 +40,20 @@ void setup() {
 void loop() {
   // Measure the distance
   measureDistanceF();
-  delay(10);
   measureDistanceR();
 
   if (errorR > BUFF_R) {
     //RIGHT WHEEL TURNS
-    setRightMotor(15);
+    setRightMotor(10);
+    setLeftMotor(0);
+  } else if (errorR < -50) {
+    // STOP
+    setRightMotor(0);
     setLeftMotor(0);
   } else if (errorR < -BUFF_R) {
     // LEFT WHEEL TURNS
     setRightMotor(0);
-    setLeftMotor(15);
+    setLeftMotor(10);
   } else if (errorF > 300) {
     setRightMotor(-100);
     setLeftMotor(-100);
@@ -88,6 +91,10 @@ void measureDistanceF() {
   Serial.print("Front: ");
   Serial.print(distF);
   Serial.print(" cm");
+
+   Serial.print("\tFront: ");
+  Serial.print(errorF);
+  Serial.print(" cm");
 }
 
 // Measure distance using the ultrasonic sensor
@@ -109,6 +116,10 @@ void measureDistanceR() {
   // Output the distance to the Serial Monitor
   Serial.print("\tRight: ");
   Serial.print(distR);
+  Serial.print(" cm");
+
+  Serial.print("\tRight Error: ");
+  Serial.print(errorR);
   Serial.println(" cm");
 }
 
