@@ -14,7 +14,7 @@ int photocellValL = 0;
 int photocellValR = 0;
 const int photocellPinL = A0;
 const int photocellPinR = A2;
-const int THRESHOLD = 550; 
+const int THRESHOLD = 650; 
 
 // History
 enum Motion {
